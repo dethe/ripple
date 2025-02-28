@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Ripple</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="../p5.js"></script>
+    <script src="../ring.js" defer></script>
+    <script src="../script.js" defer></script>
+    <style>
+      html,
+      body,
+      canvas {
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+      main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #000;
+      }
+      button {
+        border-radius: 20px;
+      }
+      #helpbutton,
+      #aboutbutton {
+        position: absolute;
+        z-index: 2;
+        left: 10px;
+        top: 10px;
+      }
+      #aboutbutton {
+        top: 40px;
+      }
+      video {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      type="button"
+      id="helpbutton"
+      onclick="document.getElementById('help').showModal();"
+    >
+      ?
+    </button>
+    <button
+      type="button"
+      id="aboutbutton"
+      onclick="document.getElementById('about').showModal();"
+    >
+      About Ripple
+    </button>
+    <dialog id="help">
+      Ripple is an interactive video toy that slices video frames and adds delay to the slices for interesting visualizations.
+
+      There are several different visualizers you can experiment with. The
+      following are the keyboard shortcuts.
+      <table>
+        <thead>
+          <tr>
+            <td>Key</td>
+            <td></td>
+            <td>Key</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tr>
+          <td>A</td>
+          <td>Previous Visualizer</td>
+          <td>1</td>
+          <td>Horizontal Time</td>
+        </tr>
+        <tr>
+          <td>D</td>
+          <td>Next Visualizer</td>
+          <td>2</td>
+          <td>Vertical Time</td>
+        </tr>
+        <tr>
+          <td>W</td>
+          <td>Use More Frames (smoother)</td>
+          <td>3</td>
+          <td>Time Ripples Out</td>
+        </tr>
+        <tr>
+          <td>S</td>
+          <td>Use Fewer Frames (faster)</td>
+          <td>4</td>
+          <td>Time Ripples In</td>
+        </tr>
+        <tr>
+          <td>F</td>
+          <td>Full Screen</td>
+          <td>5</td>
+          <td>Time Rotates Around</td>
+        </tr>
+      </table>
+      <button type="button" onclick="document.getElementById('help').close()">
+        Close
+      </button>
+    </dialog>
+    <dialog id="about">
+      <p>
+        Ripple is a series of experiments based on slicing up video to
+        manipulate time for different effects. It is written and maintained by
+        Dethe Elza and uses the <a href="https://p5js.org/">P5.js</a> library.
+      </p>
+      <p>
+        No video or images are saved anywhere, just briefly kept in browser
+        memory while being processed.
+      </p>
+      <button type="button" onclick="document.getElementById('about').close();">
+        Close
+      </button>
+    </dialog>
+  </body>
+</html>
