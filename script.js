@@ -1,4 +1,4 @@
-/* global Ring createCanvas createCapture translate VIDEO scale line stroke noStroke random windowWidth windowHeight ceil floor 
+/* global Ring createCanvas createCapture translate VIDEO scale line stroke noStroke random windowWidth windowHeight ceil floor
    createGraphics width height second RADIUS PIE ellipse ellipseMode drawingContext background dist image key resizeCanvas beginClip arc TWO_PI endClip frameCount round frameRate max min fill text push pop */
 
 let capture;
@@ -14,6 +14,7 @@ let renderer;
 let captureRatio = 0;
 let initialized = false;
 let maxRadius = 0;
+let showFrameRate = false;
 
 function setup() {
   renderer = createCanvas(windowWidth, windowHeight);
@@ -24,20 +25,20 @@ function setup() {
 }
 
 function videoInitialized(stream) {
-  initialized = true;
   let settings = stream.getVideoTracks()[0].getSettings();
   vwidth = settings.width;
   vheight = settings.height;
   captureRatio = vheight / vwidth;
-  for (let i = 0; i < max_buffer; i++) {
-    buffer.push(createGraphics(vwidth, vheight));
-  }
   reset();
+  initialized = true;
 }
 
 function reset() {
-  let newWidth = windowHeight / captureRatio;
+  let newWidth = floor(windowHeight / captureRatio);
   resizeCanvas(newWidth, windowHeight);
+  for (let i = 0; i < max_buffer; i++) {
+    buffer.push(createGraphics(width, height));
+  }
 }
 
 document.addEventListener(
@@ -59,7 +60,6 @@ class Horizontal {
   draw() {
     // draw slices left to right
     let slice = width / buffer_size;
-    let vslice = vwidth / buffer_size;
     buffer.forEach((img, idx) => {
       image(
         img,
@@ -67,10 +67,10 @@ class Horizontal {
         0,
         ceil(slice),
         height,
-        floor(idx * vslice),
+        floor(idx * slice),
         0,
-        ceil(vslice),
-        vheight
+        ceil(slice),
+        height
       );
     }, buffer_size);
   }
@@ -79,7 +79,6 @@ class Horizontal {
 class Vertical {
   draw() {
     let slice = height / buffer_size;
-    let vslice = vheight / buffer_size;
     buffer.forEach((img, idx) => {
       image(
         img,
@@ -88,9 +87,9 @@ class Vertical {
         width,
         ceil(slice),
         0,
-        floor(idx * vslice),
-        vwidth,
-        ceil(vslice)
+        floor(idx * slice),
+        width,
+        ceil(slice)
       );
     }, buffer_size);
   }
@@ -104,7 +103,7 @@ class CircleExpanding {
       beginClip();
       ellipse(width / 2, height / 2, maxRadius - sliceRadius * idx);
       endClip();
-      image(img, 0, 0, width, height, 0, 0, vwidth, vheight);
+      image(img, 0, 0, width, height);
       pop();
     }, buffer_size);
   }
@@ -118,7 +117,7 @@ class CircleContracting {
       beginClip();
       ellipse(width / 2, height / 2, maxRadius - sliceRadius * idx);
       endClip();
-      image(img, 0, 0, width, height, 0, 0, vwidth, vheight);
+      image(img, 0, 0, width, height);
       pop();
     }, buffer_size);
   }
@@ -131,9 +130,17 @@ class CircleRotating {
     buffer.forEach((img, idx) => {
       push();
       beginClip();
-      arc(width/2, height/2, maxRadius, maxRadius, sliceAngle * -(idx + 1) - offset - 0.01,sliceAngle * -idx - offset, PIE);
+      arc(
+        width / 2,
+        height / 2,
+        maxRadius,
+        maxRadius,
+        sliceAngle * -(idx + 1) - offset - 0.01,
+        sliceAngle * -idx - offset,
+        PIE
+      );
       endClip();
-      image(img, 0, 0, width, height, 0, 0, vwidth, vheight);
+      image(img, 0, 0, width, height);
       pop();
     }, buffer_size);
   }
@@ -151,13 +158,13 @@ function checkBufferSize() {
   // support changing how many slices are used, for performance tweaking
   if (new_buffer !== buffer_size) {
     buffer_size = new_buffer;
-    reset();
+    // reset();
   }
 }
 
 function captureFrame() {
-  // first buffer becomes last
-  buffer.rotate().image(capture, 0, 0);
+  // first buffer becomes last, resize capture image to fit screen now so we don't have to later
+  buffer.rotate().image(capture, 0, 0, width, height, 0, 0, vwidth, vheight);
 }
 
 function mirroredDraw(tool) {
@@ -170,16 +177,24 @@ function mirroredDraw(tool) {
 }
 
 function draw() {
-  checkBufferSize();
   // is video stream initialized?
   if (!initialized) {
     background(0);
     staticlines();
     return;
   }
+  checkBufferSize();
   captureFrame();
   background(255);
   mirroredDraw(tools.curr());
+  if (showFrameRate) {
+    fill("#000");
+    text(round(frameRate()), 20, 20);
+  }
+}
+
+function toggleFrameRate() {
+  showFrameRate = !showFrameRate;
 }
 
 function windowResized() {
@@ -196,6 +211,9 @@ function keyTyped() {
       break;
     case "d":
       tools.next();
+      break;
+    case "r":
+      toggleFrameRate();
       break;
     case "s":
       new_buffer = max(buffer_size - 30, min_buffer);
